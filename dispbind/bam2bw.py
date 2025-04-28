@@ -55,13 +55,13 @@ def generate_bw(out_dir, name, mquality, bam, gsize):
     Create BigWig file
     '''
     # selece high quality reads
-    filter_bam = 'samtools view -b -F2308 -q '
+    filter_bam = 'samtools view -@ 4 -b -F2308 -q '
     filter_bam += ' %s %s > %s/%s ' % (mquality, bam, out_dir, name + '.filter.bam')
     return_code = os.system(filter_bam) >> 8
     if return_code:
         sys.exit('Error: cannot filter bam file!')
     # sort bam
-    sort_bam = 'samtools sort -T '
+    sort_bam = 'samtools sort -@ 4 -T '
     #sort_bam += ' %s/%s -o %s/%s %s/%s ' % (out_dir, name + '.sorted', out_dir, name + '.sorted.bam', out_dir, name + '.bam')
     sort_bam += ' %s/%s -o %s/%s %s/%s ' % (out_dir, name + '.sorted.temp', out_dir, name + '.sorted.bam', out_dir, name + '.filter.bam')
     return_code = os.system(sort_bam) >> 8
@@ -74,8 +74,8 @@ def generate_bw(out_dir, name, mquality, bam, gsize):
     if return_code:
         sys.exit('Error: cannot remove dup!')
     # bam to bedpe and fill gaps
-    bam2sortn = 'samtools view -b -f2 '
-    bam2sortn += ' %s/%s | samtools sort -n > %s/%s' % (out_dir, name + '.deduped.bam', out_dir, name + '.sorted_n.bam')
+    bam2sortn = 'samtools view -@ 4 -b -f2 '
+    bam2sortn += ' %s/%s | samtools sort -@ 4 -n > %s/%s' % (out_dir, name + '.deduped.bam', out_dir, name + '.sorted_n.bam')
     return_code = os.system(bam2sortn) >> 8
     if return_code:
         sys.exit('Error: cannot sort bam file by name!')

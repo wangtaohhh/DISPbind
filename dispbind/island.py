@@ -42,7 +42,7 @@ def island(options):
 
     # bedtools merge loops
     print('Sort and merge peaks of distance shorter than 20k...')
-    sort_peaks = 'bedtools sort -i %s > %s' % (options['--peak'], options['--output'] + '.sort.peak')
+    sort_peaks = 'bedtools sort -@ 4 -i %s > %s' % (options['--peak'], options['--output'] + '.sort.peak')
     return_code = os.system(sort_peaks) >> 8
     if return_code:
         sys.exit('Error: cannot sort peaks!')

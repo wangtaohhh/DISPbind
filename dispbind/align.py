@@ -63,18 +63,18 @@ def bwa_map(out_dir, index, name, mquality, fastq1, fastq2, thread, gsize):
     print('Map reads with BWA...')
     bwa_cmd1 = 'bwa mem -t '
     bwa_cmd1 += ' %s %s %s %s' % (thread, index, fastq1, fastq2)
-    bwa_cmd1 += '| samtools sort -T %s/%s -o %s/%s 2>/dev/null' % (out_dir, name + '.sort.tmp', out_dir, name + '.raw.bam')
+    bwa_cmd1 += '| samtools sort -@ 4 -T %s/%s -o %s/%s 2>/dev/null' % (out_dir, name + '.sort.tmp', out_dir, name + '.raw.bam')
     return_code = os.system(bwa_cmd1) >> 8
     if return_code:
         sys.exit('Error: cannot map reads with BWA!')
 
-    filter_bam = 'samtools view -b -F2308 -q '
+    filter_bam = 'samtools view -@ 4 -b -F2308 -q '
     filter_bam += ' %s %s/%s > %s/%s ' % (mquality, out_dir, name + '.raw.bam', out_dir, name + '.bam')
     return_code = os.system(filter_bam) >> 8
     if return_code:
         sys.exit('Error: cannot filter bam file!')
     # sort bam
-    sort_bam = 'samtools sort -T '
+    sort_bam = 'samtools sort -@ 4 -T '
     sort_bam += ' %s/%s -o %s/%s %s/%s ' % (out_dir, name + '.sorted.temp', out_dir, name + '.sorted.bam', out_dir, name + '.bam')
     return_code = os.system(sort_bam) >> 8
     if return_code:
@@ -86,8 +86,8 @@ def bwa_map(out_dir, index, name, mquality, fastq1, fastq2, thread, gsize):
     if return_code:
         sys.exit('Error: cannot remove dup!')
     # bam to sortn
-    bamsortn = 'samtools view -f2 -b'
-    bamsortn += ' %s/%s |samtools sort -T %s/%s -n > %s/%s' % (out_dir, name + '.deduped.bam',out_dir, name + '.sort.tmp', out_dir, name + '.sorted_n.bam')
+    bamsortn = 'samtools view -@ 4 -f2 -b'
+    bamsortn += ' %s/%s |samtools sort -@ 4 -T %s/%s -n > %s/%s' % (out_dir, name + '.deduped.bam',out_dir, name + '.sort.tmp', out_dir, name + '.sorted_n.bam')
     return_code = os.system(bamsortn) >> 8
     if return_code:
         sys.exit('Error: cannot sorted by name!')
